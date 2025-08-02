@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import multer from 'multer';
 import sharp from 'sharp';
 import path from 'path';
@@ -20,7 +20,7 @@ const upload = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'), false);
+      cb(new Error('Only image files are allowed'));
     }
   },
 });
@@ -69,7 +69,7 @@ const processAndSaveImage = async (
 };
 
 // POST /api/upload/polish-image - Upload polish bottle or swatch image
-router.post('/polish-image', upload.single('image'), asyncHandler(async (req: AuthRequest, res) => {
+router.post('/polish-image', upload.single('image'), asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.file) {
     throw createError('No image file provided', 400);
   }
@@ -103,7 +103,7 @@ router.post('/polish-image', upload.single('image'), asyncHandler(async (req: Au
 }));
 
 // POST /api/upload/nail-art - Upload nail art image
-router.post('/nail-art', upload.single('image'), asyncHandler(async (req: AuthRequest, res) => {
+router.post('/nail-art', upload.single('image'), asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.file) {
     throw createError('No image file provided', 400);
   }
@@ -129,7 +129,7 @@ router.post('/nail-art', upload.single('image'), asyncHandler(async (req: AuthRe
 }));
 
 // POST /api/upload/multiple - Upload multiple images
-router.post('/multiple', upload.array('images', 5), asyncHandler(async (req: AuthRequest, res) => {
+router.post('/multiple', upload.array('images', 5), asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
     throw createError('No image files provided', 400);
   }
@@ -164,7 +164,7 @@ router.post('/multiple', upload.array('images', 5), asyncHandler(async (req: Aut
 }));
 
 // DELETE /api/upload/image - Delete an image
-router.delete('/image', asyncHandler(async (req: AuthRequest, res) => {
+router.delete('/image', asyncHandler(async (req: AuthRequest, res: Response) => {
   const { image_url } = req.body;
 
   if (!image_url) {
@@ -198,7 +198,7 @@ router.delete('/image', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // GET /api/upload/user-images - Get all images for user
-router.get('/user-images', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/user-images', asyncHandler(async (req: AuthRequest, res: Response) => {
   const { type } = req.query;
   
   try {

@@ -67,11 +67,11 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
-app.use('/api/polishes', authMiddleware, polishRoutes);
-app.use('/api/brands', authMiddleware, brandRoutes);
-app.use('/api/collections', authMiddleware, collectionRoutes);
-app.use('/api/analytics', authMiddleware, analyticsRoutes);
-app.use('/api/upload', authMiddleware, uploadRoutes);
+app.use('/api/polishes', authMiddleware as any, polishRoutes);
+app.use('/api/brands', authMiddleware as any, brandRoutes);
+app.use('/api/collections', authMiddleware as any, collectionRoutes);
+app.use('/api/analytics', authMiddleware as any, analyticsRoutes);
+app.use('/api/upload', authMiddleware as any, uploadRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

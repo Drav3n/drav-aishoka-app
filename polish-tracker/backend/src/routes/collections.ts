@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import Joi from 'joi';
 import { query, withTransaction } from '../utils/database';
 import { asyncHandler, createError } from '../middleware/errorHandler';
@@ -14,7 +14,7 @@ const collectionSchema = Joi.object({
 });
 
 // GET /api/collections - Get user's custom collections
-router.get('/', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/', asyncHandler(async (req: AuthRequest, res: Response) => {
   const collectionsResult = await query(`
     SELECT 
       c.*,
@@ -33,7 +33,7 @@ router.get('/', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // GET /api/collections/:id - Get specific collection with polishes
-router.get('/:id', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/:id', asyncHandler(async (req: AuthRequest, res: Response) => {
   const collectionResult = await query(`
     SELECT * FROM custom_collections 
     WHERE id = $1 AND user_id = $2
@@ -65,7 +65,7 @@ router.get('/:id', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // POST /api/collections - Create new collection
-router.post('/', asyncHandler(async (req: AuthRequest, res) => {
+router.post('/', asyncHandler(async (req: AuthRequest, res: Response) => {
   const { error, value } = collectionSchema.validate(req.body);
   if (error) {
     throw createError(error.details[0].message, 400);
@@ -84,7 +84,7 @@ router.post('/', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // PUT /api/collections/:id - Update collection
-router.put('/:id', asyncHandler(async (req: AuthRequest, res) => {
+router.put('/:id', asyncHandler(async (req: AuthRequest, res: Response) => {
   const { error, value } = collectionSchema.validate(req.body);
   if (error) {
     throw createError(error.details[0].message, 400);
@@ -108,7 +108,7 @@ router.put('/:id', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // DELETE /api/collections/:id - Delete collection
-router.delete('/:id', asyncHandler(async (req: AuthRequest, res) => {
+router.delete('/:id', asyncHandler(async (req: AuthRequest, res: Response) => {
   const result = await query(`
     DELETE FROM custom_collections 
     WHERE id = $1 AND user_id = $2 
@@ -126,7 +126,7 @@ router.delete('/:id', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // POST /api/collections/:id/polishes - Add polish to collection
-router.post('/:id/polishes', asyncHandler(async (req: AuthRequest, res) => {
+router.post('/:id/polishes', asyncHandler(async (req: AuthRequest, res: Response) => {
   const { polish_id } = req.body;
 
   if (!polish_id) {
@@ -167,7 +167,7 @@ router.post('/:id/polishes', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // DELETE /api/collections/:id/polishes/:polishId - Remove polish from collection
-router.delete('/:id/polishes/:polishId', asyncHandler(async (req: AuthRequest, res) => {
+router.delete('/:id/polishes/:polishId', asyncHandler(async (req: AuthRequest, res: Response) => {
   // Verify collection belongs to user
   const collectionResult = await query(
     'SELECT id FROM custom_collections WHERE id = $1 AND user_id = $2',

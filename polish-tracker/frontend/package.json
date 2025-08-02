@@ -19,7 +19,10 @@
     "recharts": "^2.8.0",
     "react-intersection-observer": "^9.5.3",
     "workbox-webpack-plugin": "^7.0.0",
-    "workbox-window": "^7.0.0"
+    "workbox-window": "^7.0.0",
+    "ajv8": "npm:ajv@^8.12.0",
+    "ajv8-keywords": "npm:ajv-keywords@^5.1.0",
+    "http-proxy-middleware": "^2.0.6"
   },
   "devDependencies": {
     "@types/react": "^18.2.42",
@@ -61,6 +64,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "http://localhost:3001"
+  }
 }

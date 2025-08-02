@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { query } from '../utils/database';
 import { asyncHandler } from '../middleware/errorHandler';
 import { AuthRequest } from '../types';
@@ -6,7 +6,7 @@ import { AuthRequest } from '../types';
 const router = express.Router();
 
 // GET /api/brands - Get all brands
-router.get('/', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/', asyncHandler(async (req: AuthRequest, res: Response) => {
   const brandsResult = await query(`
     SELECT 
       b.*,
@@ -24,7 +24,7 @@ router.get('/', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // GET /api/brands/:id - Get specific brand
-router.get('/:id', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/:id', asyncHandler(async (req: AuthRequest, res: Response) => {
   const brandResult = await query(`
     SELECT 
       b.*,
@@ -36,10 +36,11 @@ router.get('/:id', asyncHandler(async (req: AuthRequest, res) => {
   `, [req.params.id, req.user!.id]);
 
   if (brandResult.rows.length === 0) {
-    return res.status(404).json({
+    res.status(404).json({
       success: false,
       error: 'Brand not found'
     });
+    return;
   }
 
   res.json({

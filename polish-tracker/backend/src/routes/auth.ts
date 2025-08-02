@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Response } from 'express';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as GitHubStrategy } from 'passport-github2';
 import { query } from '../utils/database';
-import { generateToken } from '../middleware/auth';
+import { generateToken, authMiddleware } from '../middleware/auth';
 import { asyncHandler } from '../middleware/errorHandler';
 import { User } from '../types';
 
@@ -15,7 +15,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "/api/auth/google/callback"
-  }, async (accessToken, refreshToken, profile, done) => {
+  }, async (accessToken: any, refreshToken: any, profile: any, done: any) => {
     try {
       // Check if user exists
       let userResult = await query(
@@ -44,7 +44,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
       return done(null, user);
     } catch (error) {
-      return done(error, null);
+      return done(error, false);
     }
   }));
 }
@@ -55,7 +55,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: "/api/auth/github/callback"
-  }, async (accessToken, refreshToken, profile, done) => {
+  }, async (accessToken: any, refreshToken: any, profile: any, done: any) => {
     try {
       // Check if user exists
       let userResult = await query(
@@ -84,7 +84,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
 
       return done(null, user);
     } catch (error) {
-      return done(error, null);
+      return done(error, false);
     }
   }));
 }
@@ -99,7 +99,7 @@ router.get('/google',
 
 router.get('/google/callback',
   passport.authenticate('google', { session: false }),
-  asyncHandler(async (req: any, res) => {
+  asyncHandler(async (req: any, res: Response) => {
     const token = generateToken(req.user.id, req.user.email);
     
     // Redirect to frontend with token
@@ -115,7 +115,7 @@ router.get('/github',
 
 router.get('/github/callback',
   passport.authenticate('github', { session: false }),
-  asyncHandler(async (req: any, res) => {
+  asyncHandler(async (req: any, res: Response) => {
     const token = generateToken(req.user.id, req.user.email);
     
     // Redirect to frontend with token
@@ -125,12 +125,13 @@ router.get('/github/callback',
 );
 
 // Dev mode login (for development only)
-router.post('/dev-login', asyncHandler(async (req, res) => {
+router.post('/dev-login', asyncHandler(async (req: any, res: Response) => {
   if (process.env.DEV_MODE !== 'true') {
-    return res.status(403).json({
+    res.status(403).json({
       success: false,
       error: 'Dev mode not enabled'
     });
+    return;
   }
 
   // Get or create dev user
@@ -168,8 +169,16 @@ router.post('/dev-login', asyncHandler(async (req, res) => {
 }));
 
 // Get current user
-router.get('/me', asyncHandler(async (req: any, res) => {
-  // This endpoint requires auth middleware to be applied at the route level
+router.get('/me', authMiddleware as any, asyncHandler(async (req: any, res: Response) => {
+  // Check if user exists (should be set by authMiddleware)
+  if (!req.user) {
+    res.status(401).json({
+      success: false,
+      error: 'User not authenticated'
+    });
+    return;
+  }
+
   res.json({
     success: true,
     data: {

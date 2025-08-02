@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { query } from '../utils/database';
 import { asyncHandler } from '../middleware/errorHandler';
 import { AuthRequest, AnalyticsData } from '../types';
@@ -6,7 +6,7 @@ import { AuthRequest, AnalyticsData } from '../types';
 const router = express.Router();
 
 // GET /api/analytics - Get comprehensive analytics for user's collection
-router.get('/', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/', asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id;
 
   // Get basic collection stats
@@ -174,7 +174,7 @@ router.get('/', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // GET /api/analytics/summary - Get quick summary stats
-router.get('/summary', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/summary', asyncHandler(async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id;
 
   const summaryResult = await query(`

@@ -78,8 +78,9 @@ export const errorHandler = (
   });
 };
 
-export const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
-  Promise.resolve(fn(req, res, next)).catch(next);
+export const asyncHandler = (fn: (req: any, res: Response, next: NextFunction) => Promise<any>) =>
+  (req: Request, res: Response, next: NextFunction) =>
+    Promise.resolve(fn(req, res, next)).catch(next);
 
 export const createError = (message: string, statusCode: number): AppError => {
   const error = new Error(message) as AppError;

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import Joi from 'joi';
 import { query, withTransaction } from '../utils/database';
 import { asyncHandler, createError } from '../middleware/errorHandler';
@@ -28,7 +28,7 @@ const updatePolishSchema = polishSchema.fork(
 );
 
 // GET /api/polishes - Get user's polish collection with filtering
-router.get('/', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/', asyncHandler(async (req: AuthRequest, res: Response) => {
   const {
     brand_id,
     finish_type,
@@ -182,7 +182,7 @@ router.get('/', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // GET /api/polishes/:id - Get specific polish
-router.get('/:id', asyncHandler(async (req: AuthRequest, res) => {
+router.get('/:id', asyncHandler(async (req: AuthRequest, res: Response) => {
   const polishResult = await query(`
     SELECT 
       p.*,
@@ -205,7 +205,7 @@ router.get('/:id', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // POST /api/polishes - Create new polish
-router.post('/', asyncHandler(async (req: AuthRequest, res) => {
+router.post('/', asyncHandler(async (req: AuthRequest, res: Response) => {
   const { error, value } = polishSchema.validate(req.body);
   if (error) {
     throw createError(error.details[0].message, 400);
@@ -247,7 +247,7 @@ router.post('/', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // PUT /api/polishes/:id - Update polish
-router.put('/:id', asyncHandler(async (req: AuthRequest, res) => {
+router.put('/:id', asyncHandler(async (req: AuthRequest, res: Response) => {
   const { error, value } = updatePolishSchema.validate(req.body);
   if (error) {
     throw createError(error.details[0].message, 400);
@@ -304,7 +304,7 @@ router.put('/:id', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // DELETE /api/polishes/:id - Delete polish
-router.delete('/:id', asyncHandler(async (req: AuthRequest, res) => {
+router.delete('/:id', asyncHandler(async (req: AuthRequest, res: Response) => {
   const result = await query(
     'DELETE FROM polishes WHERE id = $1 AND user_id = $2 RETURNING id',
     [req.params.id, req.user!.id]
@@ -321,7 +321,7 @@ router.delete('/:id', asyncHandler(async (req: AuthRequest, res) => {
 }));
 
 // POST /api/polishes/:id/usage - Record polish usage
-router.post('/:id/usage', asyncHandler(async (req: AuthRequest, res) => {
+router.post('/:id/usage', asyncHandler(async (req: AuthRequest, res: Response) => {
   const { occasion, notes } = req.body;
 
   // Check if polish exists and belongs to user
