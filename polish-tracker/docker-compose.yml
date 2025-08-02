@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: polish-tracker-db
+    environment:
+      POSTGRES_DB: polish_tracker
+      POSTGRES_USER: polish_user
+      POSTGRES_PASSWORD: polish_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - polish-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: polish-tracker-backend
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://polish_user:polish_password@postgres:5432/polish_tracker
+      JWT_SECRET: your-jwt-secret-change-in-production
+      GOOGLE_CLIENT_ID: your-google-client-id
+      GOOGLE_CLIENT_SECRET: your-google-client-secret
+      GITHUB_CLIENT_ID: your-github-client-id
+      GITHUB_CLIENT_SECRET: your-github-client-secret
+      DEV_MODE: "true"
+      PORT: 3001
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - uploads:/app/uploads
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    networks:
+      - polish-network
+    command: npm run dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: polish-tracker-frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:3001
+      REACT_APP_DEV_MODE: "true"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - polish-network
+    command: npm start
+
+volumes:
+  postgres_data:
+  uploads:
+
+networks:
+  polish-network:
+    driver: bridge
